@@ -27,7 +27,8 @@ export default function Membership() {
 
           <p className="text-gray-400 leading-relaxed">
             Join a small group of collectors with early access to new drops,
-            exclusive pieces, and a monthly mystery shard delivered to your door.
+            exclusive pieces, and a monthly mystery shard delivered to your
+            door.
           </p>
 
           <ul className="space-y-3 text-gray-300">

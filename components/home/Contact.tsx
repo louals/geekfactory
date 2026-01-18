@@ -17,9 +17,7 @@ export default function Contact() {
       >
         {/* LEFT — COPY */}
         <div className="space-y-6 max-w-md">
-          <h2 className="text-4xl font-semibold tracking-tight">
-            Contact us
-          </h2>
+          <h2 className="text-4xl font-semibold tracking-tight">Contact us</h2>
 
           <p className="text-gray-400 leading-relaxed">
             Have a question about custom pieces, wholesale, or collaborations?
