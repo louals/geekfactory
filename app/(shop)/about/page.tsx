@@ -11,13 +11,13 @@ export default function AboutPage() {
         className="max-w-4xl mx-auto space-y-8"
       >
         <h1 className="text-4xl lg:text-6xl font-serif font-bold text-center mb-12">
-          The <span className="text-bismuth-magenta">Artisan's</span> Tale
+          The <span className="text-bismuth-magenta">Artisan&apos;s</span> Tale
         </h1>
 
         <div className="prose prose-invert prose-lg mx-auto">
           <p className="text-xl text-gray-300 leading-relaxed text-center mb-12">
-            "We don't just sell jewelry; we capture instants of crystallization
-            where chaos aligns into perfect order."
+            &quot;We don&apos;t just sell jewelry; we capture instants of crystallization
+            where chaos aligns into perfect order.&quot;
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center my-16">

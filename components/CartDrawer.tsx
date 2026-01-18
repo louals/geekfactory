@@ -5,16 +5,13 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
   SheetClose,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCartStore } from '@/lib/store';
 import { Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 
 export function CartDrawer() {
   const { items, isOpen, toggleCart, updateQuantity, removeItem, total } =
@@ -38,7 +35,7 @@ export function CartDrawer() {
             </div>
             <p className="text-xl text-white font-medium">Your cart is empty</p>
             <p className="text-gray-500 text-center max-w-[200px]">
-              Looks like you haven't added any magic to your cart yet.
+              Looks like you haven&apos;t added any magic to your cart yet.
             </p>
             <SheetClose asChild>
               <Button className="mt-4 bg-white/10 hover:bg-white/20 text-white rounded-full">
