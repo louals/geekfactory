@@ -1,0 +1,132 @@
+@import 'tailwindcss';
+
+@plugin "tailwindcss-animate";
+@import 'tw-animate-css';
+
+@layer utilities {
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+}
+
+/* === CUSTOM THEME CONFIGURATION === */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* Custom Bismuth Palette */
+  --color-bismuth-bg: #0a0a0a;
+  --color-bismuth-cyan: #22d3ee;
+  --color-bismuth-magenta: #d946ef;
+  --color-bismuth-purple: #8b5cf6;
+  --color-bismuth-teal: #2dd4bf;
+  --color-bismuth-lavender: #d8b4fe;
+
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+}
+
+/* === BASE VARIABLES (Forced Dark Mode / Mystical Modernity) === */
+:root {
+  /* Dark Mode Default (User Requirement) */
+  --background: #0a0a0a;
+  --foreground: #f0f0f0;
+
+  --card: #0a0a0a; /* Will use glassmorphism usually, but fallback matches bg */
+  --card-foreground: #f0f0f0;
+
+  --popover: #0a0a0a;
+  --popover-foreground: #f0f0f0;
+
+  --primary: #22d3ee; /* Cyan as primary */
+  --primary-foreground: #0a0a0a;
+
+  --secondary: #1f1f1f;
+  --secondary-foreground: #f0f0f0;
+
+  --muted: #1f1f1f;
+  --muted-foreground: #a1a1aa;
+
+  --accent: #1f1f1f;
+  --accent-foreground: #f0f0f0;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #d946ef; /* Magenta ring */
+
+  --radius: 0.5rem;
+}
+
+/* Add a class for glassmorphism utilities if needed, or just use Tailwind utilities */
+@layer utilities {
+  .glass {
+    @apply bg-black/40 backdrop-blur-md border border-white/10;
+  }
+  .glass-card {
+    @apply bg-black/30 backdrop-blur-lg border border-white/10 shadow-xl;
+  }
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-bismuth-cyan via-bismuth-magenta to-bismuth-purple;
+  }
+  .btn-glow {
+    @apply shadow-[0_0_15px_rgba(34,211,238,0.5)] hover:shadow-[0_0_25px_rgba(217,70,239,0.7)] transition-shadow duration-300;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
