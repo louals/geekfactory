@@ -16,8 +16,8 @@ export default function AboutPage() {
 
         <div className="prose prose-invert prose-lg mx-auto">
           <p className="text-xl text-gray-300 leading-relaxed text-center mb-12">
-            &quot;We don&apos;t just sell jewelry; we capture instants of crystallization
-            where chaos aligns into perfect order.&quot;
+            &quot;We don&apos;t just sell jewelry; we capture instants of
+            crystallization where chaos aligns into perfect order.&quot;
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center my-16">
