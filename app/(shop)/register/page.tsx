@@ -1,3 +1,7 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -10,8 +14,50 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Link from 'next/link';
+import { authService } from '@/lib/services/auth';
+import { useAuthStore } from '@/lib/auth-store';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const { user, setAuth } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      router.push('/');
+    }
+  }, [user, router]);
+
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const name = `${formData.firstName} ${formData.lastName}`.trim();
+      const data = await authService.register({
+        name,
+        email: formData.email,
+        password: formData.password,
+      });
+      setAuth(data.user, data.accessToken, data.refreshToken);
+      toast.success('Account created successfully!');
+      router.push('/');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Registration failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-[80vh] px-4">
       <Card className="w-full max-w-md bg-black/40 border-white/10 backdrop-blur-md">
@@ -23,54 +69,84 @@ export default function RegisterPage() {
             Join the realm and track your collection
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="first-name" className="text-gray-200">
+                  First name
+                </Label>
+                <Input
+                  id="first-name"
+                  placeholder="John"
+                  required
+                  value={formData.firstName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, firstName: e.target.value })
+                  }
+                  className="bg-white/5 border-white/10 text-white focus-visible:ring-bismuth-cyan"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last-name" className="text-gray-200">
+                  Last name
+                </Label>
+                <Input
+                  id="last-name"
+                  placeholder="Doe"
+                  required
+                  value={formData.lastName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, lastName: e.target.value })
+                  }
+                  className="bg-white/5 border-white/10 text-white focus-visible:ring-bismuth-cyan"
+                />
+              </div>
+            </div>
             <div className="space-y-2">
-              <Label htmlFor="first-name" className="text-gray-200">
-                First name
+              <Label htmlFor="email" className="text-gray-200">
+                Email
               </Label>
               <Input
-                id="first-name"
-                placeholder="John"
-                className="bg-white/5 border-white/10 text-white focus-visible:ring-bismuth-cyan"
+                id="email"
+                type="email"
+                required
+                placeholder="m@example.com"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-bismuth-cyan"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="last-name" className="text-gray-200">
-                Last name
+              <Label htmlFor="password" className="text-gray-200">
+                Password
               </Label>
               <Input
-                id="last-name"
-                placeholder="Doe"
+                id="password"
+                type="password"
+                required
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 className="bg-white/5 border-white/10 text-white focus-visible:ring-bismuth-cyan"
               />
             </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-gray-200">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="m@example.com"
-              className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 focus-visible:ring-bismuth-cyan"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-gray-200">
-              Password
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              className="bg-white/5 border-white/10 text-white focus-visible:ring-bismuth-cyan"
-            />
-          </div>
-          <Button className="w-full bg-white text-black hover:bg-gray-200 font-medium">
-            Create Account
-          </Button>
-        </CardContent>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full bg-white text-black hover:bg-gray-200 font-medium"
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                'Create Account'
+              )}
+            </Button>
+          </CardContent>
+        </form>
         <CardFooter className="flex flex-col space-y-4 text-center">
           <div className="text-sm text-gray-400">
             Already have an account?{' '}
@@ -86,3 +162,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

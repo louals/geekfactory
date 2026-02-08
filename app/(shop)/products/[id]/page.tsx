@@ -1,29 +1,66 @@
+'use client';
+
+import { useEffect, useState, use } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { productService } from '@/lib/services/products';
+import { useCartStore } from '@/lib/store';
+import { Product } from '@/types/api';
+import { Loader2, Heart } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function ProductPage({ params }: PageProps) {
-  const { id } = await params;
+export default function ProductPage({ params }: PageProps) {
+  const { id } = use(params);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { addItem, isLoading: isAdding } = useCartStore();
 
-  // Placeholder data structure (in a real app, fetch from DB)
-  const product = {
-    id,
-    name: 'Bismuth Crystal Pendant',
-    price: '$129.00',
-    description:
-      'A stunning geometric formation of pure Bismuth, grown in our lab to achieve vibrant iridescent colors. This piece features a unique hopper crystal structure, maximizing light refraction. Each oxidization layer provides a different color based on its thickness.',
-    specs: [
-      { label: 'Element', value: 'Bismuth (Bi)' },
-      { label: 'Atomic Number', value: '83' },
-      { label: 'Crystal System', value: 'Rhombohedral' },
-      { label: 'Hardness', value: '2.25 Mohs' },
-      { label: 'Melting Point', value: '271.4°C' },
-      { label: 'Origin', value: 'Lab Grown (USA)' },
-    ],
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const data = await productService.getProductById(id);
+        setProduct(data);
+      } catch (error) {
+        console.error('Failed to fetch product:', error);
+        toast.error('Product not found');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-10 w-10 text-white animate-spin" />
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-white">
+        <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
+        <Button asChild variant="outline">
+          <Link href="/products">Back to Collection</Link>
+        </Button>
+      </div>
+    );
+  }
+
+  const handleAddToCart = async () => {
+    try {
+      await addItem(product, 1);
+      toast.success(`${product.name} added to cart!`);
+    } catch (error) {
+      toast.error('Failed to add to cart');
+    }
   };
 
   return (
@@ -44,32 +81,36 @@ export default async function ProductPage({ params }: PageProps) {
           {/* Background Glow */}
           <div className="absolute w-64 h-64 rounded-full bg-gradient-to-br from-bismuth-cyan to-bismuth-purple animate-pulse blur-[100px] opacity-30" />
 
-          <Image
-            src="/hero-bismuth.png"
-            alt="Product"
-            width={500}
-            height={500}
-            className="relative z-10 object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.1)] group-hover:scale-105 group-hover:rotate-3 transition-all duration-700 ease-out"
-            priority
-          />
+          {product.images?.[0] ? (
+            <Image
+              src={product.images[0]}
+              alt={product.name}
+              width={500}
+              height={500}
+              className="relative z-10 object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.1)] group-hover:scale-105 group-hover:rotate-3 transition-all duration-700 ease-out"
+              priority
+            />
+          ) : (
+            <div className="relative z-10 w-48 h-48 border-4 border-bismuth-magenta/30 rotate-45 group-hover:rotate-90 transition-transform duration-700 shadow-[0_0_50px_rgba(217,70,239,0.3)]" />
+          )}
         </div>
 
         {/* Details Section */}
         <div className="space-y-8">
           <div className="space-y-2">
             <h2 className="text-bismuth-cyan tracking-widest uppercase text-xs font-bold mb-2 border border-bismuth-cyan/30 inline-block px-3 py-1 rounded-full bg-bismuth-cyan/10">
-              Atomic Collection
+              {typeof product.category === 'string' ? 'Collection' : product.category.name}
             </h2>
             <h1 className="text-4xl md:text-5xl font-serif font-bold text-white">
               {product.name}
             </h1>
             <p className="text-3xl text-bismuth-magenta font-mono font-medium">
-              {product.price}
+              ${product.price.toFixed(2)}
             </p>
           </div>
 
           <p className="text-gray-400 text-lg leading-relaxed border-l-2 border-white/10 pl-6">
-            {product.description}
+            {product.description || 'No description available.'}
           </p>
 
           {/* Specs */}
@@ -79,16 +120,22 @@ export default async function ProductPage({ params }: PageProps) {
               Technical Specifications
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
-              {product.specs.map((spec) => (
-                <div key={spec.label} className="flex flex-col">
-                  <span className="text-xs text-gray-500 uppercase tracking-widest">
-                    {spec.label}
-                  </span>
-                  <span className="text-white font-medium text-lg">
-                    {spec.value}
-                  </span>
-                </div>
-              ))}
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 uppercase tracking-widest">
+                  Stock Availability
+                </span>
+                <span className="text-white font-medium text-lg">
+                  {product.stock > 0 ? `${product.stock} units` : 'Out of Stock'}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-gray-500 uppercase tracking-widest">
+                  Element
+                </span>
+                <span className="text-white font-medium text-lg">
+                  Bismuth (Bi)
+                </span>
+              </div>
             </div>
           </div>
 
@@ -96,9 +143,17 @@ export default async function ProductPage({ params }: PageProps) {
           <div className="flex gap-4 pt-4">
             <Button
               size="lg"
+              onClick={handleAddToCart}
+              disabled={isAdding || product.stock <= 0}
               className="flex-1 rounded-full bg-gradient-to-r from-bismuth-cyan to-bismuth-purple text-black font-bold text-lg hover:shadow-[0_0_25px_rgba(34,211,238,0.5)] transition-all border-none h-14 relative overflow-hidden group"
             >
-              <span className="relative z-10">Add to Cart</span>
+              {isAdding ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <span className="relative z-10">
+                  {product.stock > 0 ? 'Add to Cart' : 'Out of Stock'}
+                </span>
+              )}
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
             </Button>
             <Button
@@ -106,19 +161,7 @@ export default async function ProductPage({ params }: PageProps) {
               variant="outline"
               className="h-14 w-14 rounded-full border-white/20 hover:bg-white/10 hover:text-bismuth-magenta hover:border-bismuth-magenta transition-colors"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-              </svg>
+              <Heart className="h-6 w-6" />
             </Button>
           </div>
         </div>
@@ -126,3 +169,4 @@ export default async function ProductPage({ params }: PageProps) {
     </div>
   );
 }
+

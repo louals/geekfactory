@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
-import { Package, Eye, Download, Filter, Search } from 'lucide-react';
+import { Package, Eye, Filter, Search, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import {
@@ -22,68 +22,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { orderService } from '@/lib/services/orders';
+import { Order } from '@/types/api';
 
 export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const orders = [
-    {
-      id: '#1024',
-      date: 'Jan 12, 2024',
-      status: 'Fulfilled',
-      total: '$129.00',
-      payment: 'Paid',
-      items: 2,
-      trackingNumber: 'TRK123456789',
-    },
-    {
-      id: '#1023',
-      date: 'Dec 28, 2023',
-      status: 'Fulfilled',
-      total: '$89.50',
-      payment: 'Paid',
-      items: 1,
-      trackingNumber: 'TRK987654321',
-    },
-    {
-      id: '#1018',
-      date: 'Nov 15, 2023',
-      status: 'Processing',
-      total: '$230.00',
-      payment: 'Paid',
-      items: 3,
-      trackingNumber: null,
-    },
-    {
-      id: '#1015',
-      date: 'Oct 22, 2023',
-      status: 'Shipped',
-      total: '$175.00',
-      payment: 'Paid',
-      items: 2,
-      trackingNumber: 'TRK456789123',
-    },
-    {
-      id: '#1012',
-      date: 'Sep 30, 2023',
-      status: 'Cancelled',
-      total: '$65.00',
-      payment: 'Refunded',
-      items: 1,
-      trackingNumber: null,
-    },
-  ];
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const data = await orderService.getOrdersMe();
+        setOrders(data);
+      } catch (error) {
+        console.error('Failed to fetch orders:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchOrders();
+  }, []);
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Fulfilled':
+    switch (status.toLowerCase()) {
+      case 'completed':
+      case 'paid':
         return 'bg-green-500/10 text-green-400 border-green-500/20';
-      case 'Shipped':
+      case 'shipped':
         return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
-      case 'Processing':
+      case 'processing':
+      case 'pending':
         return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20';
-      case 'Cancelled':
+      case 'cancelled':
         return 'bg-red-500/10 text-red-400 border-red-500/20';
       default:
         return 'bg-white/10 text-white/60 border-white/20';
@@ -91,7 +63,7 @@ export default function OrdersPage() {
   };
 
   const filteredOrders = orders.filter((order) => {
-    const matchesSearch = order.id
+    const matchesSearch = order._id
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
     const matchesStatus =
@@ -153,9 +125,9 @@ export default function OrdersPage() {
               </SelectTrigger>
               <SelectContent className="bg-black/95 border-white/10 text-white">
                 <SelectItem value="all">All Orders</SelectItem>
-                <SelectItem value="fulfilled">Fulfilled</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="shipped">Shipped</SelectItem>
-                <SelectItem value="processing">Processing</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="cancelled">Cancelled</SelectItem>
               </SelectContent>
             </Select>
@@ -163,7 +135,11 @@ export default function OrdersPage() {
         </motion.div>
 
         {/* Orders Table */}
-        {filteredOrders.length > 0 ? (
+        {isLoading ? (
+          <div className="flex items-center justify-center p-20">
+            <Loader2 className="w-8 h-8 text-white animate-spin" />
+          </div>
+        ) : filteredOrders.length > 0 ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -175,7 +151,7 @@ export default function OrdersPage() {
                 <TableHeader className="bg-white/5">
                   <TableRow className="hover:bg-transparent border-white/10">
                     <TableHead className="text-white/80 uppercase tracking-wider text-xs">
-                      Order
+                      Order ID
                     </TableHead>
                     <TableHead className="text-white/80 uppercase tracking-wider text-xs">
                       Date
@@ -185,9 +161,6 @@ export default function OrdersPage() {
                     </TableHead>
                     <TableHead className="text-white/80 uppercase tracking-wider text-xs">
                       Items
-                    </TableHead>
-                    <TableHead className="text-white/80 uppercase tracking-wider text-xs">
-                      Payment
                     </TableHead>
                     <TableHead className="text-white/80 uppercase tracking-wider text-xs">
                       Total
@@ -200,7 +173,7 @@ export default function OrdersPage() {
                 <TableBody>
                   {filteredOrders.map((order, index) => (
                     <motion.tr
-                      key={order.id}
+                      key={order._id}
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
@@ -208,30 +181,27 @@ export default function OrdersPage() {
                     >
                       <TableCell className="font-medium">
                         <Link
-                          href={`/orders/${order.id}`}
+                          href={`/profile/orders/${order._id}`}
                           className="text-bismuth-cyan hover:text-bismuth-magenta transition-colors"
                         >
-                          {order.id}
+                          #{order._id.slice(-6).toUpperCase()}
                         </Link>
                       </TableCell>
                       <TableCell className="text-white/70">
-                        {order.date}
+                        {new Date(order.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
                         <Badge
-                          className={`${getStatusColor(order.status)} border`}
+                          className={`${getStatusColor(order.status)} border capitalize`}
                         >
                           {order.status}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-white/70">
-                        {order.items} items
-                      </TableCell>
-                      <TableCell className="text-white/70">
-                        {order.payment}
+                        {order.items.reduce((acc, item) => acc + item.quantity, 0)} items
                       </TableCell>
                       <TableCell className="text-white font-medium">
-                        {order.total}
+                        ${order.total.toFixed(2)}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
@@ -241,19 +211,10 @@ export default function OrdersPage() {
                             className="text-white/60 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
                             asChild
                           >
-                            <Link href={`/orders/${order.id}`}>
+                            <Link href={`/profile/orders/${order._id}`}>
                               <Eye className="w-4 h-4" />
                             </Link>
                           </Button>
-                          {order.trackingNumber && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="text-white/60 hover:text-white hover:bg-white/10 h-8 w-8 p-0"
-                            >
-                              <Download className="w-4 h-4" />
-                            </Button>
-                          )}
                         </div>
                       </TableCell>
                     </motion.tr>
@@ -289,3 +250,4 @@ export default function OrdersPage() {
     </div>
   );
 }
+

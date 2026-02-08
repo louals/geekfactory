@@ -7,6 +7,7 @@ interface ProductCardProps {
   id: string;
   name: string;
   price: string;
+  category?: string;
   image?: string;
   delay?: number;
 }
@@ -15,6 +16,7 @@ export function ProductCard({
   id,
   name,
   price,
+  category,
   image,
   delay = 0,
 }: ProductCardProps) {
@@ -41,6 +43,11 @@ export function ProductCard({
         )}
       </div>
       <CardContent className="p-6 relative z-10">
+        {category && (
+          <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">
+            {category}
+          </p>
+        )}
         <h3 className="text-xl font-serif font-bold text-white mb-2">{name}</h3>
         <p className="text-bismuth-cyan text-lg font-mono">{price}</p>
       </CardContent>
@@ -55,3 +62,4 @@ export function ProductCard({
     </Card>
   );
 }
+

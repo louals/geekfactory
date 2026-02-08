@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,29 +13,83 @@ import {
   Edit2,
   Save,
   X,
+  Loader2,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { authService } from '@/lib/services/auth';
+import { useAuthStore } from '@/lib/auth-store';
+import { toast } from 'sonner';
 
 export default function ProfilePage() {
+  const { user, updateUser } = useAuthStore();
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: 'Alexandria',
-    lastName: 'Smith',
-    email: 'alexandria.smith@example.com',
-    phone: '+1 (555) 123-4567',
-    dateOfBirth: '1990-05-15',
-    country: 'United States',
-    city: 'New York',
+    name: '',
+    email: '',
+    phone: '',
+    dateOfBirth: '',
+    country: '',
+    city: '',
   });
 
-  const handleSave = () => {
-    // TODO: Implement save logic
-    setIsEditing(false);
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: '', // These fields are not in the basic User type but could be added
+        dateOfBirth: '',
+        country: '',
+        city: '',
+      });
+    } else {
+      // If not logged in, fetch from /me
+      const fetchProfile = async () => {
+        try {
+          const profile = await authService.getMe();
+          updateUser(profile);
+          setFormData({
+            name: profile.name || '',
+            email: profile.email || '',
+            phone: '',
+            dateOfBirth: '',
+            country: '',
+            city: '',
+          });
+        } catch (error) {
+          console.error('Failed to fetch profile:', error);
+        }
+      };
+      fetchProfile();
+    }
+  }, [user, updateUser]);
+
+  const handleSave = async () => {
+    setIsLoading(true);
+    try {
+      const updated = await authService.updateMe({
+        name: formData.name,
+      });
+      updateUser(updated);
+      toast.success('Profile updated successfully');
+      setIsEditing(false);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    // Reset form data to original values
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: user.name,
+        email: user.email,
+      }));
+    }
   };
 
   return (
@@ -76,9 +130,14 @@ export default function ProfilePage() {
               </Button>
               <Button
                 onClick={handleSave}
+                disabled={isLoading}
                 className="bg-gradient-to-r from-bismuth-cyan to-bismuth-magenta hover:opacity-90 text-white gap-2"
               >
-                <Save className="w-4 h-4" />
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
                 Save Changes
               </Button>
             </div>
@@ -101,34 +160,16 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label
-                  htmlFor="firstName"
+                  htmlFor="name"
                   className="text-white/80 text-sm uppercase tracking-wider"
                 >
-                  First Name
+                  Full Name
                 </Label>
                 <Input
-                  id="firstName"
-                  value={formData.firstName}
+                  id="name"
+                  value={formData.name}
                   onChange={(e) =>
-                    setFormData({ ...formData, firstName: e.target.value })
-                  }
-                  disabled={!isEditing}
-                  className="bg-white/5 border-white/10 text-white disabled:opacity-60 disabled:cursor-not-allowed focus:border-bismuth-cyan"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label
-                  htmlFor="lastName"
-                  className="text-white/80 text-sm uppercase tracking-wider"
-                >
-                  Last Name
-                </Label>
-                <Input
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, lastName: e.target.value })
+                    setFormData({ ...formData, name: e.target.value })
                   }
                   disabled={!isEditing}
                   className="bg-white/5 border-white/10 text-white disabled:opacity-60 disabled:cursor-not-allowed focus:border-bismuth-cyan"
@@ -177,10 +218,7 @@ export default function ProfilePage() {
                   id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  disabled={!isEditing}
+                  disabled={true} // Email usually not editable from profile
                   className="bg-white/5 border-white/10 text-white disabled:opacity-60 disabled:cursor-not-allowed focus:border-bismuth-cyan"
                 />
               </div>
@@ -275,3 +313,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

@@ -1,3 +1,6 @@
+
+'use client';
+
 import Link from 'next/link';
 import {
   LayoutDashboard,
@@ -8,11 +11,38 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+import { useAuthStore } from '@/lib/auth-store';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user, clearAuth } = useAuthStore();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && (!user || user.role !== 'admin')) {
+      router.push('/');
+    }
+  }, [user, mounted, router]);
+
+  const handleLogout = () => {
+    clearAuth();
+    router.push('/login');
+  };
+
+  if (!mounted || !user || user.role !== 'admin') {
+    return null;
+  }
+
   return (
     <div className="min-h-screen flex bg-[#050505]">
       <aside className="w-64 border-r border-white/10 bg-black/40 backdrop-blur-xl h-screen sticky top-0 flex flex-col hidden lg:flex">
@@ -69,12 +99,13 @@ export default function AdminLayout({
           <div className="flex items-center gap-3 mb-4">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-bismuth-cyan to-bismuth-purple" />
             <div>
-              <p className="text-sm font-medium text-white">The Smith</p>
-              <p className="text-xs text-gray-500">Super Admin</p>
+              <p className="text-sm font-medium text-white">{user.name}</p>
+              <p className="text-xs text-gray-500 uppercase tracking-widest">{user.role}</p>
             </div>
           </div>
           <Button
             variant="ghost"
+            onClick={handleLogout}
             className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10 gap-2"
           >
             <LogOut size={16} />

@@ -10,12 +10,27 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useCartStore } from '@/lib/store';
-import { Minus, Plus, ShoppingBag, Trash2 } from 'lucide-react';
+import { Minus, Plus, ShoppingBag, Trash2, Loader2 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function CartDrawer() {
-  const { items, isOpen, toggleCart, updateQuantity, removeItem, total } =
-    useCartStore();
+  const router = useRouter();
+  const {
+    items,
+    isOpen,
+    toggleCart,
+    updateQuantity,
+    removeItem,
+    totalAmount,
+    isLoading
+  } = useCartStore();
+
+  const handleCheckout = () => {
+    toggleCart();
+    router.push('/checkout');
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={toggleCart}>
@@ -45,7 +60,12 @@ export function CartDrawer() {
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto py-4">
+            <div className="flex-1 overflow-y-auto py-4 relative">
+              {isLoading && (
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-50 flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 text-white animate-spin" />
+                </div>
+              )}
               <div className="space-y-6">
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4 group">
@@ -63,9 +83,11 @@ export function CartDrawer() {
                     </div>
                     <div className="flex-1 space-y-1">
                       <div className="flex justify-between items-start">
-                        <h4 className="text-white font-medium line-clamp-2">
-                          {item.name}
-                        </h4>
+                        <Link href={`/products/${item.id}`} onClick={toggleCart}>
+                          <h4 className="text-white font-medium line-clamp-2 hover:text-bismuth-cyan transition-colors">
+                            {item.name}
+                          </h4>
+                        </Link>
                         <button
                           onClick={() => removeItem(item.id)}
                           className="text-gray-500 hover:text-red-400 transition-colors"
@@ -85,7 +107,8 @@ export function CartDrawer() {
                           onClick={() =>
                             updateQuantity(item.id, item.quantity - 1)
                           }
-                          className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
+                          disabled={isLoading}
+                          className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors disabled:opacity-50"
                         >
                           <Minus className="w-3 h-3 text-white" />
                         </button>
@@ -96,7 +119,8 @@ export function CartDrawer() {
                           onClick={() =>
                             updateQuantity(item.id, item.quantity + 1)
                           }
-                          className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors"
+                          disabled={isLoading}
+                          className="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors disabled:opacity-50"
                         >
                           <Plus className="w-3 h-3 text-white" />
                         </button>
@@ -111,14 +135,17 @@ export function CartDrawer() {
               <div className="flex justify-between text-base">
                 <span className="text-gray-400">Subtotal</span>
                 <span className="text-white font-medium font-mono">
-                  ${total().toFixed(2)} USD
+                  ${totalAmount.toFixed(2)} USD
                 </span>
               </div>
               <p className="text-xs text-gray-500">
                 Shipping and taxes calculated at checkout.
               </p>
               <div className="space-y-3">
-                <Button className="w-full rounded-full bg-gradient-to-r from-bismuth-cyan to-bismuth-purple text-black font-bold h-12 text-lg hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] transition-all border-none">
+                <Button
+                  onClick={handleCheckout}
+                  className="w-full rounded-full bg-gradient-to-r from-bismuth-cyan to-bismuth-purple text-black font-bold h-12 text-lg hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] transition-all border-none"
+                >
                   Checkout
                 </Button>
                 <SheetClose asChild>
@@ -126,7 +153,7 @@ export function CartDrawer() {
                     variant="outline"
                     className="w-full rounded-full border-white/10 hover:bg-white/5 text-gray-400 hover:text-white h-12"
                   >
-                    View Cart
+                    Continue Shopping
                   </Button>
                 </SheetClose>
               </div>
@@ -137,3 +164,4 @@ export function CartDrawer() {
     </Sheet>
   );
 }
+
