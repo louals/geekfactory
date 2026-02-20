@@ -18,6 +18,7 @@ import {
   X,
   Crown,
   UserCircle,
+  Gavel,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,7 @@ import logo from '@/assets/logo.png';
 
 const NAV_LINKS = [
   { label: 'Shop', href: '/products' },
+  { label: 'Auctions', href: '/auctions' },
   { label: 'Wholesale', href: '/wholesale' },
   { label: 'About', href: '/about' },
   { label: 'Articles', href: '/articles' },
@@ -247,6 +249,11 @@ export default function Navbar() {
                     icon={<Package className="h-4 w-4" />}
                     label="Orders"
                     href="/profile/orders"
+                  />
+                  <MenuItem
+                    icon={<Gavel className="h-4 w-4" />}
+                    label="My Bids"
+                    href="/profile/bids"
                   />
                   <MenuItem
                     icon={<MapPin className="h-4 w-4" />}

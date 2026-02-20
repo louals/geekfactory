@@ -27,9 +27,10 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Package, Layers, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Package, Layers, Search, Gavel } from 'lucide-react';
 import { productService } from '@/lib/services/products';
 import { categoryService } from '@/lib/services/categories';
+import { biddingService } from '@/lib/services/bidding';
 import { Product, Category } from '@/types/api';
 import { toast } from 'sonner';
 
@@ -59,6 +60,15 @@ export default function InventoryPage() {
     const [categoryForm, setCategoryForm] = useState({
         name: '',
         slug: '',
+    });
+
+    // Bidding states
+    const [isBiddingDialogOpen, setIsBiddingDialogOpen] = useState(false);
+    const [biddingProduct, setBiddingProduct] = useState<Product | null>(null);
+    const [biddingForm, setBiddingForm] = useState({
+        startAt: '',
+        endAt: '',
+        startPrice: 0,
     });
 
     useEffect(() => {
@@ -186,6 +196,54 @@ export default function InventoryPage() {
             slug: category.slug,
         });
         setIsCategoryDialogOpen(true);
+    };
+
+    const openBiddingDialog = (product: Product) => {
+        setBiddingProduct(product);
+        // Default values: start now, end in 3 days
+        const now = new Date();
+        const threeDaysLater = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+        // Convert to local datetime-local format (YYYY-MM-DDTHH:mm)
+        // We subtract the timezone offset to get the correct local time string from toISOString
+        const toLocalISOString = (date: Date) => {
+            const offset = date.getTimezoneOffset() * 60000; // offset in milliseconds
+            const localDate = new Date(date.getTime() - offset);
+            return localDate.toISOString().slice(0, 16);
+        };
+
+        setBiddingForm({
+            startAt: toLocalISOString(now),
+            endAt: toLocalISOString(threeDaysLater),
+            startPrice: product.price,
+        });
+        setIsBiddingDialogOpen(true);
+    };
+
+    const handleEnableBidding = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!biddingProduct) return;
+
+        try {
+            // First ensure the product is active so it's visible on the site
+            if (!biddingProduct.isActive) {
+                await productService.updateProduct(biddingProduct._id, { isActive: true });
+            }
+
+            await biddingService.enableBidding(biddingProduct._id, {
+                startAt: new Date(biddingForm.startAt).toISOString(),
+                endAt: new Date(biddingForm.endAt).toISOString(),
+                startPrice: Number(biddingForm.startPrice),
+            });
+
+            toast.success(`Bidding enabled for ${biddingProduct.name}`);
+            setIsBiddingDialogOpen(false);
+            setBiddingProduct(null);
+            fetchData(); // Refresh to show updated status potentially
+        } catch (error) {
+            console.error(error);
+            toast.error('Failed to enable bidding');
+        }
     };
 
     const filteredProducts = products.filter((p) =>
@@ -372,6 +430,52 @@ export default function InventoryPage() {
                 )}
             </div>
 
+            {/* Bidding Dialog */}
+            <Dialog open={isBiddingDialogOpen} onOpenChange={setIsBiddingDialogOpen}>
+                <DialogContent className="bg-black/90 border-white/10 text-white">
+                    <DialogHeader>
+                        <DialogTitle>Enable Bidding: {biddingProduct?.name}</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleEnableBidding} className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Start Price ($)</Label>
+                            <Input
+                                type="number"
+                                required
+                                value={biddingForm.startPrice}
+                                onChange={(e) => setBiddingForm({ ...biddingForm, startPrice: parseFloat(e.target.value) })}
+                                className="bg-white/5 border-white/10"
+                            />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Start Time</Label>
+                                <Input
+                                    type="datetime-local"
+                                    required
+                                    value={biddingForm.startAt}
+                                    onChange={(e) => setBiddingForm({ ...biddingForm, startAt: e.target.value })}
+                                    className="bg-white/5 border-white/10"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>End Time</Label>
+                                <Input
+                                    type="datetime-local"
+                                    required
+                                    value={biddingForm.endAt}
+                                    onChange={(e) => setBiddingForm({ ...biddingForm, endAt: e.target.value })}
+                                    className="bg-white/5 border-white/10"
+                                />
+                            </div>
+                        </div>
+                        <Button type="submit" className="w-full bg-gradient-to-r from-bismuth-magenta to-bismuth-purple text-white hover:opacity-90 mt-4">
+                            <Gavel className="w-4 h-4 mr-2" /> Start Auction
+                        </Button>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
             <div className="rounded-xl border border-white/10 bg-black/40 backdrop-blur-md overflow-hidden">
                 {activeTab === 'products' ? (
                     <Table>
@@ -421,12 +525,28 @@ export default function InventoryPage() {
                                             </span>
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant={product.isActive ? 'default' : 'secondary'} className={product.isActive ? 'bg-green-500/20 text-green-400 border-green-500/20' : 'bg-gray-500/20 text-gray-400 border-gray-500/20'}>
-                                                {product.isActive ? 'Active' : 'Inactive'}
-                                            </Badge>
+                                            <div className="flex flex-col gap-1">
+                                                <Badge variant={product.isActive ? 'default' : 'secondary'} className={product.isActive ? 'bg-green-500/20 text-green-400 border-green-500/20' : 'bg-gray-500/20 text-gray-400 border-gray-500/20'}>
+                                                    {product.isActive ? 'Active' : 'Inactive'}
+                                                </Badge>
+                                                {product.biddingActive && (
+                                                    <Badge variant="outline" className="border-bismuth-magenta text-bismuth-magenta bg-bismuth-magenta/10 w-fit">
+                                                        Auction Active
+                                                    </Badge>
+                                                )}
+                                            </div>
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex items-center justify-center gap-2">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    title="Start Auction"
+                                                    onClick={() => openBiddingDialog(product)}
+                                                    className="h-8 w-8 text-bismuth-magenta hover:text-bismuth-purple hover:bg-bismuth-magenta/10"
+                                                >
+                                                    <Gavel size={16} />
+                                                </Button>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
@@ -500,6 +620,6 @@ export default function InventoryPage() {
                     </Table>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

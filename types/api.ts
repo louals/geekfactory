@@ -22,6 +22,8 @@ export interface Product {
     isActive: boolean;
     images?: string[];
     image?: string;
+    biddingActive?: boolean;
+    biddingEndAt?: string;
 }
 
 
@@ -49,6 +51,33 @@ export interface Order {
     total: number;
     status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled';
     createdAt: string;
+}
+
+export interface Bid {
+    _id: string;
+    product: string | Product;
+    user: string | User;
+    amount: number;
+    createdAt: string;
+}
+
+export interface BiddingProduct extends Product {
+    biddingActive: boolean;
+    biddingStartAt?: string;
+    biddingEndAt?: string;
+    biddingStartPrice?: number;
+    currentHighestBid?: number;
+    totalBids?: number;
+    winner?: string | User;
+    bids?: Bid[];
+}
+
+export interface BidHistoryItem {
+    _id: string;
+    product: Product;
+    amount: number;
+    createdAt: string;
+    isHighestBid?: boolean;
 }
 
 export interface AuthResponse {
