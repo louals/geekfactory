@@ -6,10 +6,11 @@ import { ReactNode } from 'react';
 // Mock next/image
 jest.mock('next/image', () => ({
   __esModule: true,
-  // Use 'ComponentPropsWithoutRef' or a simple object for the mock
   default: (props: ImageProps) => {
-    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
-    return <img {...props} />;
+    // 1. Destructure to remove fill and priority so they don't reach the <img> tag
+    // 2. Removed the eslint-disable comments that were causing the "Unused directive" warning
+    const { src, alt, fill, priority, ...rest } = props;
+    return <img src={src} alt={alt} {...rest} />;
   },
 }));
 
@@ -28,10 +29,12 @@ jest.mock('framer-motion', () => ({
   },
 }));
 
-// Define the shape of image props to satisfy the linter
+// Define the shape of image props
 interface ImageProps {
   src: string;
   alt: string;
+  fill?: boolean;
+  priority?: boolean;
 }
 
 describe('Hero', () => {
