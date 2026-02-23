@@ -18,6 +18,19 @@ export const biddingService = {
         return response.data;
     },
 
+    /** Fetch ALL bidding products (active + ended) for the admin panel */
+    getAllAuctions: async () => {
+        // Uses the same endpoint as the public one; filter on client if needed
+        const response = await api.get<BiddingProduct[]>('/products/bidding/products?all=true');
+        return response.data;
+    },
+
+    /** Declare a winner for an auction (admin only) */
+    declareWinner: async (productId: string, userId: string) => {
+        const response = await api.post(`/products/${productId}/close-bidding`, { winnerId: userId });
+        return response.data;
+    },
+
     // Client/Public Endpoints
     getActiveAuctions: async () => {
         const response = await api.get<BiddingProduct[]>('/products/bidding/products');

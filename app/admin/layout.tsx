@@ -8,6 +8,7 @@ import {
   Users,
   Package,
   LogOut,
+  Gavel,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -73,6 +74,16 @@ export default function AdminLayout({
               className="group-hover:text-bismuth-magenta transition-colors"
             />
             Inventory
+          </Link>
+          <Link
+            href="/admin/auctions"
+            className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors group"
+          >
+            <Gavel
+              size={20}
+              className="group-hover:text-yellow-400 transition-colors"
+            />
+            Auctions
           </Link>
           <Link
             href="/admin/orders"
