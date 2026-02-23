@@ -32,7 +32,7 @@ jobs:
         # Combined into one step to keep the logs cleaner
         run: |
           npm run lint
-          npm test -- --coverage
+          npm test
 
       - name: Build
         run: npm run build
