@@ -86,7 +86,7 @@ export function Navbar() {
             <button className="hidden md:block text-white/60 hover:text-primary transition-all duration-300">
               <Search className="h-5 w-5" />
             </button>
-            <Link href="/admin/add-product" className="hidden sm:block text-white/60 hover:text-primary transition-all duration-300">
+            <Link href="/" className="hidden sm:block text-white/60 hover:text-primary transition-all duration-300">
               <User className="h-5 w-5" />
             </Link>
             <Link href="#" className="relative text-white/60 hover:text-primary transition-all duration-300 group">
@@ -122,7 +122,7 @@ export function Navbar() {
                        <div className="flex items-center gap-4 text-zinc-500 uppercase text-xs font-bold tracking-widest">
                           <Search className="h-4 w-4" /> RECHERCHER
                        </div>
-                       <Link href="/admin/add-product" className="flex items-center gap-4 text-zinc-500 uppercase text-xs font-bold tracking-widest">
+                       <Link href="/" className="flex items-center gap-4 text-zinc-500 uppercase text-xs font-bold tracking-widest">
                           <User className="h-4 w-4" /> MON COMPTE
                        </Link>
                     </div>

@@ -56,14 +56,12 @@ export default function Home() {
                 />
               </div>
               
-              {/* Overlay Button - Repositioned for Mobile */}
               <div className="absolute -bottom-4 right-4 md:inset-y-0 md:-right-8 lg:-right-12 flex items-center z-20">
                  <Button size="lg" className="rounded-full bg-white text-black hover:bg-white/90 font-black px-6 h-12 md:h-16 md:px-10 text-xs md:text-lg shadow-2xl flex items-center gap-2 transition-all duration-300 active:scale-95">
                    NOUVEAUTÉS <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
                  </Button>
               </div>
 
-              {/* Progress Indicators - Hidden on extra small */}
               <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 hidden sm:flex gap-3 z-20">
                  <div className="w-8 h-1 rounded-full bg-primary" />
                  <div className="w-8 h-1 rounded-full bg-white/10" />
@@ -73,7 +71,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Manga Section - Enhanced for Mobile */}
+        {/* Manga Section */}
         <section className="container mx-auto px-4 overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
              <div>
@@ -99,7 +97,7 @@ export default function Home() {
                    <Image src={manga.image} alt={manga.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                    <div className="absolute inset-x-2 bottom-2 md:inset-x-3 md:bottom-3 z-20">
-                      <Button className="w-full bg-primary/95 hover:bg-primary text-white text-[9px] font-black h-9 md:h-10 rounded-lg md:rounded-xl md:translate-y-6 md:opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out">
+                      <Button className="w-full bg-primary/95 hover:bg-primary text-white text-[10px] font-black h-9 md:h-10 rounded-lg md:rounded-xl md:translate-y-6 md:opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 ease-out">
                         AJOUTER
                       </Button>
                    </div>
@@ -120,7 +118,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Location Section - Responsive Overhaul */}
+        {/* Location Section - Updated Hours */}
         <section className="container mx-auto px-4 py-12 md:py-20 overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-12 items-center">
             <div className="space-y-6 md:space-y-8 text-center lg:text-left">
@@ -149,10 +147,13 @@ export default function Home() {
                   <div className="mt-1 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/5 flex items-center justify-center flex-shrink-0">
                     <Clock className="h-4 w-4 md:h-5 md:w-5 text-zinc-400" />
                   </div>
-                  <div>
+                  <div className="grid grid-cols-1 gap-1">
                     <h4 className="text-xs md:font-bold text-white uppercase tracking-wider">Horaires</h4>
-                    <p className="text-zinc-500 text-xs md:text-sm">Samedi au Jeudi : 10h00 - 18h00</p>
-                    <p className="text-primary text-[10px] md:text-xs font-bold mt-1 uppercase tracking-tighter italic">Fermé le Vendredi</p>
+                    <div className="text-[10px] md:text-sm text-zinc-500 font-bold uppercase tracking-tighter grid grid-cols-2 gap-x-4">
+                       <span className="text-zinc-400">Sam - Jeu</span> <span>10:00 – 20:00</span>
+                       <span className="text-zinc-400">Vendredi</span> <span className="text-primary">15:00 – 20:00</span>
+                       <span className="text-zinc-400">Dimanche</span> <span className="text-zinc-700">Fermé</span>
+                    </div>
                   </div>
                 </div>
 
@@ -211,7 +212,7 @@ export default function Home() {
 
       </main>
 
-      {/* Mobile-Friendly Footer */}
+      {/* Mobile-Friendly Footer - Updated Socials */}
       <footer className="border-t border-white/5 pt-16 md:pt-32 pb-8 md:pb-12 bg-black overflow-hidden relative">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-primary to-transparent" />
         
@@ -228,11 +229,12 @@ export default function Home() {
                    </p>
                 </div>
                 <div className="flex items-center justify-center sm:justify-start gap-3 md:gap-4">
-                  {[Instagram, Twitter, Facebook, Youtube].map((Icon, idx) => (
-                    <a key={idx} href="#" className="h-9 w-9 md:h-10 md:w-10 rounded-lg bg-zinc-900 flex items-center justify-center hover:bg-primary transition-colors">
-                      <Icon className="h-4 w-4 md:h-5 md:w-5 text-zinc-400 hover:text-white" />
-                    </a>
-                  ))}
+                  <a href="https://www.instagram.com/geek_factory_dz/" target="_blank" className="h-9 w-9 md:h-10 md:w-10 rounded-lg bg-zinc-900 flex items-center justify-center hover:bg-primary transition-colors group">
+                    <Instagram className="h-4 w-4 md:h-5 md:w-5 text-zinc-400 group-hover:text-white" />
+                  </a>
+                  <a href="http://facebook.com/geekfactorydz/" target="_blank" className="h-9 w-9 md:h-10 md:w-10 rounded-lg bg-zinc-900 flex items-center justify-center hover:bg-primary transition-colors group">
+                    <Facebook className="h-4 w-4 md:h-5 md:w-5 text-zinc-400 group-hover:text-white" />
+                  </a>
                 </div>
              </div>
 
