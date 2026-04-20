@@ -1,24 +1,23 @@
-import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
-import './globals.css';
-import { Toaster } from '@/components/ui/sonner';
+import type { Metadata } from "next";
+import { Inter, Orbitron } from "next/font/google";
+import "./globals.css";
+import { Navbar } from "@/components/layout/Navbar";
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+const orbitron = Orbitron({
+  subsets: ["latin"],
+  variable: "--font-orbitron",
 });
 
 export const metadata: Metadata = {
-  title: 'The Bismuth Smith | Alchemy of Elements',
-  description:
-    'Elite ecommerce shop specializing in iridescent Bismuth jewelry and crystals. Mystical Modernity.',
+  title: "GeekFactory | Figures, Manga & Gaming in Algiers",
+  description: "The ultimate destination for anime collectors and gaming enthusiasts in Algeria.",
   icons: {
-    icon: '/favicon.ico',
+    icon: "/images/logo.jpg",
   },
 };
 
@@ -28,12 +27,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white selection:bg-bismuth-magenta/30`}
+        className={`${inter.variable} ${orbitron.variable} font-sans antialiased bg-background text-foreground`}
       >
+        <Navbar />
         {children}
-        <Toaster />
       </body>
     </html>
   );
